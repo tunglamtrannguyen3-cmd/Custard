@@ -19,10 +19,21 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
 
-    - name: Install Linux GUI Dependencies
+    - name: Install Linux GUI & FLTK Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake libssl-dev libfltk1.3-dev
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          libssl-dev \
+          libx11-dev \
+          libxext-dev \
+          libxft-dev \
+          libxinerama-dev \
+          libxcursor-dev \
+          libxrender-dev \
+          libxfixes-dev \
+          libfontconfig1-dev
 
     - name: Run Tests
       run: cargo test
