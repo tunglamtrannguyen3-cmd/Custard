@@ -33,7 +33,10 @@ jobs:
           libxcursor-dev \
           libxrender-dev \
           libxfixes-dev \
-          libfontconfig1-dev
+          libfontconfig1-dev \
+          libpango1.0-dev \
+          libcairo2-dev \
+          libglib2.0-dev
 
     - name: Run Tests
       run: cargo test
