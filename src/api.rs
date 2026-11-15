@@ -23,7 +23,11 @@ pub fn send_chat_request(
     match res {
         Ok(data) => {
             if let Some(choice) = data.choices.first() {
-                Ok(choice.message.content.clone())
+                if let Some(text) = choice.message.content.as_str() {
+                    Ok(text.to_string())
+                } else {
+                    Ok(choice.message.content.to_string())
+                }
             } else {
                 Err("No response choices returned from API.".to_string())
             }

@@ -1,6 +1,7 @@
 use custard::api::send_chat_request;
 use custard::models::{ChatRequest, ChatResponse, Message, SavedData};
 use custard::storage::storage_path;
+use serde_json::json;
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
@@ -87,18 +88,18 @@ fn test_default_saved_data() {
 fn test_message_serialization() {
     let msg = Message {
         role: "user".to_owned(),
-        content: "Hello Custard!".to_owned(),
+        content: json!("Hello Custard!"),
     };
 
-    let json = serde_json::to_string(&msg).expect("Failed to serialize message");
+    let json_str = serde_json::to_string(&msg).expect("Failed to serialize message");
     let value: serde_json::Value =
-        serde_json::from_str(&json).expect("Failed to parse serialized message");
+        serde_json::from_str(&json_str).expect("Failed to parse serialized message");
     assert_eq!(value["role"], "user");
     assert_eq!(value["content"], "Hello Custard!");
 
-    let deserialized: Message = serde_json::from_str(&json).expect("Failed to deserialize message");
+    let deserialized: Message = serde_json::from_str(&json_str).expect("Failed to deserialize message");
     assert_eq!(deserialized.role, "user");
-    assert_eq!(deserialized.content, "Hello Custard!");
+    assert_eq!(deserialized.content, json!("Hello Custard!"));
 }
 
 #[test]
@@ -106,11 +107,11 @@ fn test_chat_request_payload() {
     let messages = vec![
         Message {
             role: "system".to_owned(),
-            content: "You are a test assistant.".to_owned(),
+            content: json!("You are a test assistant."),
         },
         Message {
             role: "user".to_owned(),
-            content: "Ping".to_owned(),
+            content: json!("Ping"),
         },
     ];
 
@@ -119,9 +120,9 @@ fn test_chat_request_payload() {
         messages,
     };
 
-    let json = serde_json::to_string(&req).expect("Failed to serialize ChatRequest");
+    let json_str = serde_json::to_string(&req).expect("Failed to serialize ChatRequest");
     let value: serde_json::Value =
-        serde_json::from_str(&json).expect("Failed to parse serialized ChatRequest");
+        serde_json::from_str(&json_str).expect("Failed to parse serialized ChatRequest");
     assert_eq!(value["model"], "gpt-4o-mini");
     assert_eq!(value["messages"][1]["content"], "Ping");
 }
@@ -142,7 +143,7 @@ fn test_chat_response_deserialization() {
     let res: ChatResponse = serde_json::from_str(json_data).expect("Failed to parse ChatResponse");
     assert_eq!(res.choices.len(), 1);
     assert_eq!(res.choices[0].message.role, "assistant");
-    assert_eq!(res.choices[0].message.content, "Pong from AI");
+    assert_eq!(res.choices[0].message.content, json!("Pong from AI"));
 }
 
 #[test]
@@ -165,23 +166,23 @@ fn test_saved_data_json_roundtrip() {
         messages: vec![
             Message {
                 role: "system".to_owned(),
-                content: "System instructions".to_owned(),
+                content: json!("System instructions"),
             },
             Message {
                 role: "user".to_owned(),
-                content: "Hello!".to_owned(),
+                content: json!("Hello!"),
             },
         ],
     };
 
-    let json = serde_json::to_string_pretty(&original).expect("Failed to serialize SavedData");
-    let loaded: SavedData = serde_json::from_str(&json).expect("Failed to deserialize SavedData");
+    let json_str = serde_json::to_string_pretty(&original).expect("Failed to serialize SavedData");
+    let loaded: SavedData = serde_json::from_str(&json_str).expect("Failed to deserialize SavedData");
 
     assert_eq!(loaded.api_url, original.api_url);
     assert_eq!(loaded.api_key, original.api_key);
     assert_eq!(loaded.model, original.model);
     assert_eq!(loaded.messages.len(), 2);
-    assert_eq!(loaded.messages[1].content, "Hello!");
+    assert_eq!(loaded.messages[1].content, json!("Hello!"));
 }
 
 #[test]
@@ -190,7 +191,7 @@ fn test_send_chat_request_posts_payload_and_returns_reply() {
     let (url, server) = mock_server("200 OK", response);
     let messages = vec![Message {
         role: "user".to_owned(),
-        content: "Ping".to_owned(),
+        content: json!("Ping"),
     }];
 
     let reply = send_chat_request(

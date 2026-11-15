@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Message {
     pub role: String,
-    pub content: String,
+    pub content: Value, // Supports both String and multimodal arrays
 }
 
 #[derive(Serialize, Debug)]
@@ -22,7 +23,7 @@ pub struct Choice {
     pub message: Message,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)] // <--- Added Clone here
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SavedData {
     pub api_url: String,
     pub api_key: String,
@@ -38,7 +39,7 @@ impl Default for SavedData {
             model: "gpt-4o-mini".to_owned(),
             messages: vec![Message {
                 role: "system".to_owned(),
-                content: "You are Custard, a lightweight AI assistant built in Rust.".to_owned(),
+                content: Value::String("You are Custard, a lightweight AI assistant built in Rust.".to_owned()),
             }],
         }
     }
